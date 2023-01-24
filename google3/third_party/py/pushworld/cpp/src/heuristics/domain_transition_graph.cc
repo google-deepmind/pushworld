@@ -263,24 +263,40 @@ float SingleSourcePathDistances::getDistance(const Position2D target) {
   return std::numeric_limits<float>::infinity();
 };
 
+std::shared_ptr<FeasibleMovementGraph> reverseGraph(
+    const std::shared_ptr<FeasibleMovementGraph>& graph) {
+  auto reversed_graph = std::make_shared<FeasibleMovementGraph>();
+  reversed_graph->reserve(graph->size());
+
+  for (const auto& pair : *graph) {
+    (*reversed_graph)[pair.first];
+    for (const auto& target : pair.second) {
+      (*reversed_graph)[target].insert(pair.first);
+    }
+  }
+  return reversed_graph;
+}
+
 PathDistances::PathDistances(
     const std::shared_ptr<FeasibleMovementGraph>& graph) {
-  for (const auto& pair : *graph) {
+  auto reversed_graph = reverseGraph(graph);
+
+  for (const auto& pair : *reversed_graph) {
     m_distances[pair.first] =
-        std::make_unique<SingleSourcePathDistances>(graph, pair.first);
+        std::make_unique<SingleSourcePathDistances>(reversed_graph, pair.first);
   }
 };
 
-float PathDistances::getDistance(const Position2D start,
+float PathDistances::getDistance(const Position2D source,
                                  const Position2D target) const {
-  const auto& iterator = m_distances.find(start);
+  const auto& iterator = m_distances.find(target);
 
   // Return infinity if no path exists.
   if (iterator == m_distances.end()) {
     return std::numeric_limits<float>::infinity();
   }
 
-  return iterator->second->getDistance(target);
+  return iterator->second->getDistance(source);
 };
 
 }  // namespace heuristic
