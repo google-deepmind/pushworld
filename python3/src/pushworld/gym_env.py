@@ -223,11 +223,7 @@ class PushWorldEnv(gym.Env):
         truncated = False if self._max_steps is None else self._steps >= self._max_steps
         info = {"puzzle_state": self._current_state}
 
-        if gym.__version__ == '0.19.0':
-            return observation, reward, terminated, truncated, info
-
-        done = terminated or truncated
-        return observation, reward, done, info
+        return observation, reward, terminated, truncated, info
 
     def render(self, mode='rgb_array') -> np.ndarray:
         """Implements `gym.Env.render`.
@@ -242,4 +238,3 @@ class PushWorldEnv(gym.Env):
             border_width=self._border_width,
             pixels_per_cell=self._pixels_per_cell,
         )
-

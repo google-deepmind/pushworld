@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import pytest
 import subprocess
 import tempfile
 from typing import List
@@ -25,6 +26,13 @@ from pushworld.config import (
 )
 from pushworld.pddl import puzzle_to_pddl
 from pushworld.puzzle import Actions, PushWorldPuzzle
+
+
+MISSING_PLANNER_EXECUTABLE = not os.path.exists(FAST_DOWNWARD_PATH)
+SKIP_TEST_REASON = (
+    "The Fast Downward executable was not found. "
+    "You may need to update `FAST_DOWNWARD_PATH` in `src/pushworld/config.py`."
+)
 
 
 def run_fast_downward(
@@ -150,6 +158,7 @@ def check_pddl(puzzle_name: str, for_bfws: bool, solution_exists: bool) -> None:
         assert plan is None
 
 
+@pytest.mark.skipif(MISSING_PLANNER_EXECUTABLE, reason=SKIP_TEST_REASON)
 def test_conversion() -> None:
     """Checks that `puzzle_to_pddl` generates a PDDL description that correctly
     represents the dynamics of the PushWorld environment.

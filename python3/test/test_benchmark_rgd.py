@@ -14,13 +14,23 @@
 
 import os
 import tempfile
+import pytest
 from typing import Any, Dict
 
 import yaml
 
 from pushworld.benchmark_rgd import benchmark_rgd_planner
-from pushworld.config import BENCHMARK_PUZZLES_PATH, PUZZLE_EXTENSION
+from pushworld.config import (
+    BENCHMARK_PUZZLES_PATH, PUZZLE_EXTENSION, RGD_PLANNER_PATH
+)
 from pushworld.puzzle import Actions, PushWorldPuzzle
+
+
+MISSING_PLANNER_EXECUTABLE = not os.path.exists(RGD_PLANNER_PATH)
+SKIP_TEST_REASON = (
+    "The RGD planner executable was not found. "
+    "You may need to update `RGD_PLANNER_PATH` in `src/pushworld/config.py`."
+)
 
 
 def _benchmark_puzzle(puzzle_file_path: str, **kwargs) -> Dict[str, Any]:
@@ -50,6 +60,7 @@ def _benchmark_puzzle(puzzle_file_path: str, **kwargs) -> Dict[str, Any]:
         return yaml.safe_load(planning_result_file)
 
 
+@pytest.mark.skipif(MISSING_PLANNER_EXECUTABLE, reason=SKIP_TEST_REASON)
 def test_success():
     """Verifies that a plan is returned when a puzzle is solved."""
     puzzle_name = "Pull Dont Push"
@@ -57,7 +68,9 @@ def test_success():
         BENCHMARK_PUZZLES_PATH, "level2", puzzle_name + PUZZLE_EXTENSION
     )
 
-    result = _benchmark_puzzle(puzzle_file_path, time_limit=None, memory_limit=None)
+    result = _benchmark_puzzle(
+        puzzle_file_path, time_limit=None, memory_limit=None
+    )
 
     puzzle = PushWorldPuzzle(puzzle_file_path)
     plan = [Actions.FROM_CHAR[s] for s in result["plan"].upper()]
@@ -69,9 +82,11 @@ def test_success():
     assert result.get("failure_reason", None) is None
 
 
+@pytest.mark.skipif(MISSING_PLANNER_EXECUTABLE, reason=SKIP_TEST_REASON)
 def test_time_limit():
     """Verifies that `benchmark_rgd_planner` detects when a puzzle reaches the
-    time limit."""
+    time limit.
+    """
     time_limit = 1  # seconds
 
     result = _benchmark_puzzle(
@@ -87,9 +102,11 @@ def test_time_limit():
     assert result["planning_time"] == time_limit
 
 
+@pytest.mark.skipif(MISSING_PLANNER_EXECUTABLE, reason=SKIP_TEST_REASON)
 def test_memory_limit():
     """Verifies that `benchmark_rgd_planner` detects when a puzzle reaches the
-    memory limit."""
+    memory limit.
+    """
     result = _benchmark_puzzle(
         os.path.join(
             BENCHMARK_PUZZLES_PATH, "level2", "Pull Dont Push" + PUZZLE_EXTENSION

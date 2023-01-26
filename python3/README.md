@@ -1,6 +1,10 @@
 Python PushWorld
 ----------------
 
+Prerequisites:
+- Python >= v3.10 must be installed.
+- Python3-venv must be installed.
+
 To configure and install all dependencies, run the setup script from this directory:
 
 ```
@@ -14,12 +18,18 @@ scripts and tests within this package, the virtual environment must be activated
 source venv/bin/activate
 ```
 
-To run all unit tests, install [Fast Downward](https://github.com/aibasel/downward),
-update the `FAST_DOWNWARD_PATH` in `src/pushworld/config.py`, and run:
+To run all unit tests:
 
 ```
 pytest test
 ```
+
+Some functions depend on [Fast Downward](https://github.com/aibasel/downward).
+Once installed, you may need to update the `FAST_DOWNWARD_PATH` in
+`src/pushworld/config.py`.
+
+The RGD benchmarking functions require building the RGD planner in the [../cpp](../cpp)
+directory of this repository. For build instructions, see [../cpp/README.md](../cpp/README.md).
 
 ## Scripts
 
