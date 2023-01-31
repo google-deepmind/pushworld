@@ -25,19 +25,18 @@ BOOST_AUTO_TEST_SUITE(search)
 
 /* Checks that `backtrackPlan` returns expected results. */
 BOOST_AUTO_TEST_CASE(test_backtrack_plan) {
-  pushworld::PushWorldPuzzle world("puzzles/trivial.pwp");
+  PushWorldPuzzle world("puzzles/trivial.pwp");
   const auto initial_state = world.getInitialState();
 
   auto search_node = std::make_shared<SearchNode>(nullptr, initial_state);
   auto plan = backtrackPlan(world, search_node);
   BOOST_TEST(plan.empty());
 
-  pushworld::Plan expected_plan{pushworld::RIGHT, pushworld::DOWN,
-                                pushworld::RIGHT, pushworld::UP};
-  pushworld::State state = initial_state;
+  Plan expected_plan{RIGHT, DOWN, RIGHT, UP};
+  State state = initial_state;
 
   for (const auto action : expected_plan) {
-    state = world.getNextState(state, action);
+    state = world.getNextState(state, action).state;
     search_node = std::make_shared<SearchNode>(search_node, state);
   }
 
@@ -45,7 +44,7 @@ BOOST_AUTO_TEST_CASE(test_backtrack_plan) {
   BOOST_TEST(plan == expected_plan);
 
   plan = backtrackPlan(world, search_node->parent);
-  expected_plan = {pushworld::RIGHT, pushworld::DOWN, pushworld::RIGHT};
+  expected_plan = {RIGHT, DOWN, RIGHT};
   BOOST_TEST(plan == expected_plan);
 }
 

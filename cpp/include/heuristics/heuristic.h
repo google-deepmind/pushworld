@@ -41,7 +41,8 @@ class Heuristic {
    * costs. E.g., some heuristics may spend computation to incrementally improve
    * the estimated cost with repeated calls.
    */
-  virtual Cost estimate_cost_to_goal(const pushworld::State& state) = 0;
+  virtual Cost estimate_cost_to_goal(
+      const pushworld::RelativeState& relative_state) = 0;
 };
 
 }  // namespace heuristic

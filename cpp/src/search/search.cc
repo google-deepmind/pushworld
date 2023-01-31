@@ -33,7 +33,8 @@ Plan backtrackPlan(const PushWorldPuzzle& puzzle,
     // is small, it is faster to reconstruct the actions during backtracking
     // rather than store actions with every node during a search.
     for (action = 0; action < NUM_ACTIONS; action++) {
-      if (node->state == puzzle.getNextState(node->parent->state, action)) {
+      if (node->state ==
+          puzzle.getNextState(node->parent->state, action).state) {
         plan.push_back(action);
         break;
       }

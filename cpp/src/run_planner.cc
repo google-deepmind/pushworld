@@ -48,8 +48,9 @@ std::optional<Plan> solve(const std::shared_ptr<PushWorldPuzzle> puzzle,
     heuristic::HeuristicsAndWeights heuristics_and_weights = {
         {std::make_shared<heuristic::NoveltyHeuristic>(
              puzzle->getInitialState().size()),
-         // float has 7 digits of precision, and the novelty heuristic only uses
-         // one.
+         // The maximum novelty is 3, so 3e6 maintains sub-integer precision
+         // with a `float` type. All RGD heuristic values are either integers
+         // or infinite.
          1e6f},
         {rgd, 1.0f}};
     heuristic::WeightedSumHeuristic heuristic(heuristics_and_weights);

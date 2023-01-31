@@ -575,7 +575,7 @@ def _populate_dynamic_collisions(
 
     Args:
         collision_positions: Modified in place. This function adds all positions of the
-            pushee relative to the pusher in which moving the pusher in the direction
+            pusher relative to the pushee in which moving the pusher in the direction
             of the given `action` results in a collision with the pushee.
         action: The direction of the pushing movement.
         pusher_pixels: The pixel positions of the pusher object, measured in the

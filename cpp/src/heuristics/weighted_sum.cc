@@ -34,12 +34,13 @@ WeightedSumHeuristic::WeightedSumHeuristic(
   }
 };
 
-float WeightedSumHeuristic::estimate_cost_to_goal(const State& state) {
+float WeightedSumHeuristic::estimate_cost_to_goal(
+    const RelativeState& relative_state) {
   auto it = m_heuristics_and_weights.begin();
 
-  float cost = it->first->estimate_cost_to_goal(state) * it->second;
+  float cost = it->first->estimate_cost_to_goal(relative_state) * it->second;
   while (++it != m_heuristics_and_weights.end()) {
-    cost += it->first->estimate_cost_to_goal(state) * it->second;
+    cost += it->first->estimate_cost_to_goal(relative_state) * it->second;
   }
 
   return cost;

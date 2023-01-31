@@ -29,7 +29,8 @@ namespace {
 /* Always returns zero cost to the goal. */
 class NullHeuristic : public pushworld::heuristic::Heuristic<int> {
  public:
-  int estimate_cost_to_goal(const pushworld::State& state) override {
+  int estimate_cost_to_goal(
+      const pushworld::RelativeState& relative_state) override {
     return 0;
   };
 };
@@ -43,13 +44,14 @@ class ManhattanDistanceHeuristic : public pushworld::heuristic::Heuristic<int> {
  public:
   ManhattanDistanceHeuristic(const pushworld::Goal& goal) : m_goal(goal){};
 
-  int estimate_cost_to_goal(const pushworld::State& state) override {
+  int estimate_cost_to_goal(
+      const pushworld::RelativeState& relative_state) override {
     int cost = 0;
     int goal_x, goal_y, object_x, object_y;
 
     for (int i = 0; i < m_goal.size();) {
       pushworld::position_to_xy(m_goal[i++], goal_x, goal_y);
-      pushworld::position_to_xy(state[i], object_x, object_y);
+      pushworld::position_to_xy(relative_state.state[i], object_x, object_y);
       cost += abs(goal_x - object_x) + abs(goal_y - object_y);
     }
 
@@ -68,8 +70,10 @@ class InvertedManhattanDistanceHeuristic
       : m_goal(goal){};
 
  public:
-  int estimate_cost_to_goal(const pushworld::State& state) override {
-    return -ManhattanDistanceHeuristic(m_goal).estimate_cost_to_goal(state);
+  int estimate_cost_to_goal(
+      const pushworld::RelativeState& relative_state) override {
+    return -ManhattanDistanceHeuristic(m_goal).estimate_cost_to_goal(
+        relative_state);
   };
 };
 

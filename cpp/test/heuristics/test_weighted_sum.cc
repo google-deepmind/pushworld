@@ -33,27 +33,30 @@ class ConstantHeuristic : public Heuristic<float> {
 
  public:
   ConstantHeuristic(const float cost) : m_cost(cost){};
-  float estimate_cost_to_goal(const State& state) { return m_cost; }
+  float estimate_cost_to_goal(const RelativeState& relative_state) {
+    return m_cost;
+  }
 };
 
 }  // namespace
 
 /* Checks `WeightedSumHeuristic`. */
 BOOST_AUTO_TEST_CASE(test_novelty_heuristic) {
-  State state;
+  RelativeState relative_state;
 
   for (float i = 0.0f; i < 5; i++) {
     HeuristicsAndWeights heuristics_and_weights = {
         {std::make_shared<ConstantHeuristic>(i), i + 1}};
     WeightedSumHeuristic h(heuristics_and_weights);
-    BOOST_TEST(h.estimate_cost_to_goal(state) == i * (i + 1));
+    BOOST_TEST(h.estimate_cost_to_goal(relative_state) == i * (i + 1));
 
     for (float j = -5.0f; j < 5; j++) {
       HeuristicsAndWeights heuristics_and_weights2 = {
           {std::make_shared<ConstantHeuristic>(i), i + 1},
           {std::make_shared<ConstantHeuristic>(j), j + 1}};
       WeightedSumHeuristic h2(heuristics_and_weights2);
-      BOOST_TEST(h2.estimate_cost_to_goal(state) == i * (i + 1) + j * (j + 1));
+      BOOST_TEST(h2.estimate_cost_to_goal(relative_state) ==
+                 i * (i + 1) + j * (j + 1));
     }
   }
 }

@@ -39,6 +39,13 @@ static const int POSITION_LIMIT = 10000;
 // A PushWorld state is a vector of the positions of all objects.
 using State = std::vector<Position2D>;
 
+// A combination of a state and a vector of the indicies of objects that have
+// changed their positions relative to some other state.
+struct RelativeState {
+  State state;
+  std::vector<int> moved_object_indices;
+};
+
 // The first object in the `State` vector always corresponds to the object that
 // actions can directly control. This object is called the "agent", and its
 // index in the `State` vector is given by `AGENT`.
@@ -191,12 +198,12 @@ class PushWorldPuzzle {
   /**
    * Returns the initial positions of all objects.
    */
-  const State& getInitialState() const { return m_initial_state; };
+  const State& getInitialState() const { return m_initial_state; }
 
   /**
    * Returns the goal positions of one or more objects.
    */
-  const Goal& getGoal() const { return m_goal; };
+  const Goal& getGoal() const { return m_goal; }
 
   /**
    * Returns a data structure that can efficiently evaluate whether performing
@@ -205,13 +212,15 @@ class PushWorldPuzzle {
    */
   const ObjectCollisions& getObjectCollisions() const {
     return m_object_collisions;
-  };
+  }
 
   /**
    * Computes the state that results from performing the `action` in the given
-   * `state`.
+   * `state`. The returned `moved_object_indices` in the relative state contain
+   * the indices of all objects whose positions differ from their positions in
+   * the given `state`.
    */
-  State getNextState(const State& state, const Action action) const;
+  RelativeState getNextState(const State& state, const Action action) const;
 
   /**
    * Returns whether the given state satisfies the goal of this puzzle.

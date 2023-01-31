@@ -47,37 +47,37 @@ class BaselineNoveltyHeuristic {
     for (auto& position_pairs : m_visited_position_pairs) {
       position_pairs.resize(state_size);
     }
-  };
+  }
 
-  int estimate_cost_to_goal(const State& state) {
+  int estimate_cost_to_goal(const RelativeState& relative_state) {
     int i, j;
-    int novelty = 2;
+    int novelty = 3;
 
-    // The novelty is 1 if any pair of objects are in a combination of positions
+    // The novelty is 2 if any pair of objects are in a combination of positions
     // that has never occurred in any state previously provided to this method.
     for (i = 0; i < m_state_size; i++) {
-      const auto& p_i = state[i];
+      const auto& p_i = relative_state.state[i];
 
       for (j = i + 1; j < m_state_size; j++) {
-        const auto& p_j = state[j];
+        const auto& p_j = relative_state.state[j];
         const PositionPair p{p_i, p_j};
 
         if (m_visited_position_pairs[i][j].insert(p).second) {
-          novelty = 1;
+          novelty = 2;
         }
       }
     }
 
-    // The novelty is 0 if any object is in a position that has never occurred
+    // The novelty is 1 if any object is in a position that has never occurred
     // in any state previously provided to this method.
     for (i = 0; i < m_state_size; i++) {
-      if (m_visited_positions[i].insert(state[i]).second) {
-        novelty = 0;
+      if (m_visited_positions[i].insert(relative_state.state[i]).second) {
+        novelty = 1;
       }
     }
 
     return novelty;
-  };
+  }
 };
 
 }  // namespace
@@ -85,60 +85,80 @@ class BaselineNoveltyHeuristic {
 /* Checks `NoveltyHeuristic` on a sequence of states with known costs. */
 BOOST_AUTO_TEST_CASE(test_novelty_heuristic) {
   NoveltyHeuristic heuristic(4);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 2, 3, 4}) == 0);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({2, 3, 4, 5}) == 0);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 3, 4, 5}) == 1);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({2, 3, 3, 5}) == 1);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 3, 3, 5}) == 2);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 3, 3, 4}) == 1);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 3, 5, 4}) == 0);
-  BOOST_TEST(heuristic.estimate_cost_to_goal({1, 3, 5, 4}) == 2);
+  BOOST_TEST(
+      heuristic.estimate_cost_to_goal(RelativeState{
+          .state = {1, 2, 3, 4}, .moved_object_indices = {0, 1, 2, 3}}) == 1);
+  BOOST_TEST(
+      heuristic.estimate_cost_to_goal(RelativeState{
+          .state = {2, 3, 4, 5}, .moved_object_indices = {0, 1, 2, 3}}) == 1);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {1, 3, 4, 5}, .moved_object_indices = {0}}) == 2);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {2, 3, 3, 5}, .moved_object_indices = {2}}) == 2);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {1, 3, 3, 5}, .moved_object_indices = {0, 2}}) == 3);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {1, 3, 3, 4}, .moved_object_indices = {3}}) == 2);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {1, 3, 5, 4}, .moved_object_indices = {2}}) == 1);
+  BOOST_TEST(heuristic.estimate_cost_to_goal(RelativeState{
+                 .state = {1, 3, 5, 4}, .moved_object_indices = {}}) == 3);
 }
 
 /* Checks that `NoveltyHeuristic` and `BaselineNoveltyHeuristic` return
  * identical costs. */
 BOOST_AUTO_TEST_CASE(test_alternative_implementation) {
   PushWorldPuzzle puzzle("puzzles/file_parsing.pwp");
+  const State& initial_state = puzzle.getInitialState();
+
+  std::vector<int> all_object_indices(initial_state.size());
+  for (int i = 0; i < initial_state.size(); i++) {
+    all_object_indices[i] = i;
+  }
+  const RelativeState initial_relative_state{initial_state,
+                                             std::move(all_object_indices)};
 
   StateSet visited_states;
-  std::deque<State> frontier;
-
-  const auto& initial_state = puzzle.getInitialState();
-  frontier.push_back(initial_state);
   visited_states.insert(initial_state);
+  
+  std::deque<RelativeState> frontier;
+  frontier.push_back(initial_relative_state);
 
   NoveltyHeuristic heuristic(initial_state.size());
   BaselineNoveltyHeuristic baseline_heuristic(initial_state.size());
 
-  std::vector<int> cost_counts{0, 0, 0};
+  std::vector<int> cost_counts{0, 0, 0, 0};
 
   // Explore states breadth-first, and check that 10,000 states all have the
   // same heuristic values.
   const int num_test_states = 1000;
 
   for (int i = 0; i < num_test_states; i++) {
-    const auto state = frontier.front();
+    const RelativeState relative_state = frontier.front();
     frontier.pop_front();
 
-    const auto cost = heuristic.estimate_cost_to_goal(state);
-    const auto baseline_cost = baseline_heuristic.estimate_cost_to_goal(state);
+    const auto cost = heuristic.estimate_cost_to_goal(relative_state);
+    const auto baseline_cost =
+        baseline_heuristic.estimate_cost_to_goal(relative_state);
 
     BOOST_TEST(cost == baseline_cost);
     cost_counts[cost]++;
 
     for (int action = 0; action < NUM_ACTIONS; action++) {
-      const auto next_state = puzzle.getNextState(state, action);
-      if (visited_states.find(next_state) == visited_states.end()) {
+      RelativeState next_relative_state =
+          puzzle.getNextState(relative_state.state, action);
+      if (visited_states.find(next_relative_state.state) ==
+          visited_states.end()) {
         // This state has not yet been visited.
-        visited_states.insert(next_state);
-        frontier.push_back(next_state);
+        visited_states.insert(next_relative_state.state);
+        frontier.push_back(std::move(next_relative_state));
       }
     }
   }
 
-  BOOST_TEST(cost_counts[0] == 75);
-  BOOST_TEST(cost_counts[1] == 546);
-  BOOST_TEST(cost_counts[2] == 379);
+  BOOST_TEST(cost_counts[1] == 75);
+  BOOST_TEST(cost_counts[2] == 546);
+  BOOST_TEST(cost_counts[3] == 379);
 
   // Check that all states were counted during this test.
   BOOST_TEST(std::accumulate(cost_counts.begin(), cost_counts.end(), 0) ==

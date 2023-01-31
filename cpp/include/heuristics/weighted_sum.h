@@ -47,7 +47,7 @@ class WeightedSumHeuristic : public Heuristic<float> {
    * Returns the weighted sum of the costs of each heuristic provided to
    * the constructor.
    */
-  float estimate_cost_to_goal(const State& state) override;
+  float estimate_cost_to_goal(const RelativeState& relative_state) override;
 };
 
 }  // namespace heuristic

@@ -30,15 +30,16 @@ namespace heuristic {
 /**
  * A graph that stores whether an object can potentially move from one position
  * to one or more adjacent positions. Any movement that is not in this graph is
- * proven to be unachievable, but note that movements in this graph are *not*
- * proven to be achievable.
+ * proven to be unachievable, but movements in this graph are not proven to
+ * be achievable.
  *
  * Has the form: { start position --> set{end position} }
  *
  * This graph is equivalent to a domain transition graph (DTG) from the Fast
  * Downward planner except that this graph does not store the conditions for
- * each object movement, which can be memory-intensive in PushWorld puzzles that
- * involve objects with large surface areas.
+ * each object movement, which can be memory-intensive in PushWorld puzzles.
+ * Consequently, this FeasibleMovementGraph is not a multigraph; it stores at
+ * most one edge from one node to another.
  */
 using FeasibleMovementGraph =
     std::unordered_map<Position2D, std::unordered_set<Position2D>>;

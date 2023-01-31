@@ -41,9 +41,11 @@ struct PositionPairHash {
 /**
  * Implements the novelty heuristic for width-based search as described in:
  *
- *     Lipovetzky, Nir, and Hector Geffner. "Best-first width search:
+ * Nir Lipovetzky and Hector Geffner. "Best-first width search:
  * Exploration and exploitation in classical planning." Thirty-First AAAI
  * Conference on Artificial Intelligence. 2017.
+ *
+ * This implementation limits the maximum novelty to 3.
  */
 class NoveltyHeuristic : public Heuristic<float> {
  private:
@@ -64,16 +66,19 @@ class NoveltyHeuristic : public Heuristic<float> {
    * states provided to this method.
    *
    * Returns:
-   *     0: if at least one object is in a position that has not occurred in any
+   *     1: if at least one object is in a position that has not occurred in any
    *        previous state.
-   *     1: if at least one pair of objects are in a combination of positions
-   * that have not occurred in any previous state. 2: otherwise.
+   *     2: if at least one pair of objects are in a combination of positions
+   *        that have not occurred in any previous state.
+   *     3: otherwise.
    *
    * Note:
-   *     For computational efficiency, the given `state` is not validated to
-   *     contain `state_size` elements.
+   *     For computational efficiency, the given `relative_state.state` is not
+   *     validated to contain `state_size` elements, nor are the indices in
+   *     `relative_state.moved_object_indices` validated to be in the interval
+   *     [0, state_size).
    */
-  float estimate_cost_to_goal(const State& state) override;
+  float estimate_cost_to_goal(const RelativeState& relative_state) override;
 };
 
 }  // namespace heuristic

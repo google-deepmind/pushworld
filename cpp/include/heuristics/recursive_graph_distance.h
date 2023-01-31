@@ -180,11 +180,11 @@ class RecursiveGraphDistanceHeuristic : public Heuristic<float> {
 
   /**
    * Returns the estimated cost to reach the goal in the puzzle provided to the
-   * constructor, starting from the given `state`. If the returned cost is
-   * infinite, then there is provably no way to reach the goal from the given
-   * state.
+   * constructor, starting from the given `relative_state.state`. If the
+   * returned cost is infinite, then there is provably no way to reach the goal
+   * from the given state.
    */
-  float estimate_cost_to_goal(const State& state) override;
+  float estimate_cost_to_goal(const RelativeState& relative_state) override;
 };
 
 }  // namespace heuristic

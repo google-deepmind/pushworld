@@ -27,57 +27,50 @@ NoveltyHeuristic::NoveltyHeuristic(const int state_size)
   }
 }
 
-float NoveltyHeuristic::estimate_cost_to_goal(const State& state) {
-  int i, j;
-  float novelty = 2.0f;
+float NoveltyHeuristic::estimate_cost_to_goal(
+    const RelativeState& relative_state) {
+  int j;
+  float novelty = 3.0f;
 
-  // The novelty is 1 if any pair of objects are in a combination of positions
+  // This loop computes the novelty and updates the set of visited positions.
+  // The novelty is 1 if any object is in a position that has never occurred in
+  // any state previously provided to this method.
+  // The novelty is 2 if any pair of objects are in a combination of positions
   // that has never occurred in any state previously provided to this method.
-  // While checking whether this state contains a novel pair of object
-  // positions, this loop simultaneously updates the set of visited pairs of
-  // positions.
-  for (i = 0; i < m_state_size; i++) {
-    const auto& p_i = state[i];
+  for (const int i : relative_state.moved_object_indices) {
+    const auto& p_i = relative_state.state[i];
 
-    for (j = i + 1; j < m_state_size; j++) {
-      const auto& p_j = state[j];
-      const PositionPair p{p_i, p_j};
+    if (m_visited_positions[i].insert(p_i).second) {
+      novelty = 1.0f;
+    }
 
-      if (m_visited_position_pairs[i][j].insert(p).second) {
-        novelty = 1.0f;
-        j++;
-        break;
+    for (j = 0; j < i; j++) {
+      const auto& p_j = relative_state.state[j];
+
+      // Order with smaller indices first. This reduces memory usage by half
+      // compared to storing both {p_i, p_j} and {p_j, p_i} in the visited set.
+      PositionPair p{p_j, p_i};
+      if (m_visited_position_pairs[j][i].insert(std::move(p)).second) {
+        if (novelty > 2.0f) {
+          novelty = 2.0f;
+        }
       }
     }
-    if (novelty == 1.0f) break;
-  }
 
-  // Finish updating all visited pairs if the loop above exited early.
-  while (i < m_state_size) {
-    const auto& p_i = state[i];
+    j++;  // skip i==j
+
     for (; j < m_state_size; j++) {
-      const auto& p_j = state[j];
-      m_visited_position_pairs[i][j].insert(PositionPair{p_i, p_j});
-    }
-    i++;
-    j = i + 1;
-  }
+      const auto& p_j = relative_state.state[j];
 
-  // The novelty is 0 if any object is in a position that has never occurred in
-  // any state previously provided to this method.
-  // While checking whether this state contains a novel object position, this
-  // loop simultaneously updates the set of visited object positions.
-  for (i = 0; i < m_state_size; i++) {
-    if (m_visited_positions[i].insert(state[i]).second) {
-      novelty = 0.0f;
-      i++;
-      break;
+      // Order with smaller indices first. This reduces memory usage by half
+      // compared to storing both {p_i, p_j} and {p_j, p_i} in the visited set.
+      PositionPair p{p_i, p_j};
+      if (m_visited_position_pairs[i][j].insert(std::move(p)).second) {
+        if (novelty > 2.0f) {
+          novelty = 2.0f;
+        }
+      }
     }
-  }
-
-  // Finish updating all visited positions if the loop above exited early.
-  for (; i < m_state_size; i++) {
-    m_visited_positions[i].insert(state[i]);
   }
 
   return novelty;

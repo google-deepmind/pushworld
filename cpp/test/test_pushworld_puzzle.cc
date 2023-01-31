@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_position_arithmetic) {
 
 /* Checks that the agent moves as expected with each action. */
 BOOST_AUTO_TEST_CASE(test_agent_movement) {
-  State next_state;
+  RelativeState next_relative_state;
   const State initial_state = {xy_to_position(1, 1)};
   int num_moveables = 1;
   int num_goal_entities = 0;
@@ -93,57 +93,56 @@ BOOST_AUTO_TEST_CASE(test_agent_movement) {
   PushWorldPuzzle puzzle(initial_state, goal, object_collisions);
 
   // Verify that the agent can move in all 4 directions
-  next_state = puzzle.getNextState(initial_state, LEFT);
-  position_to_xy(next_state[0], x, y);
-  BOOST_TEST(x == 0);
-  BOOST_TEST(y == 1);
+  next_relative_state = puzzle.getNextState(initial_state, LEFT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(0, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 1);
+  BOOST_TEST(next_relative_state.moved_object_indices[0] == 0);
 
-  next_state = puzzle.getNextState(initial_state, RIGHT);
-  position_to_xy(next_state[0], x, y);
-  BOOST_TEST(x == 2);
-  BOOST_TEST(y == 1);
+  next_relative_state = puzzle.getNextState(initial_state, RIGHT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(2, 1));
 
-  next_state = puzzle.getNextState(initial_state, UP);
-  position_to_xy(next_state[0], x, y);
-  BOOST_TEST(x == 1);
-  BOOST_TEST(y == 0);
+  next_relative_state = puzzle.getNextState(initial_state, UP);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 0));
 
-  next_state = puzzle.getNextState(initial_state, DOWN);
-  position_to_xy(next_state[0], x, y);
-  BOOST_TEST(x == 1);
-  BOOST_TEST(y == 2);
+  next_relative_state = puzzle.getNextState(initial_state, DOWN);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 2));
 
   // Add a left agent wall
   object_collisions.static_collisions[LEFT][AGENT].insert(xy_to_position(1, 1));
   PushWorldPuzzle puzzle2(initial_state, goal, object_collisions);
 
-  next_state = puzzle2.getNextState(initial_state, LEFT);
-  BOOST_TEST(next_state[0] == xy_to_position(1, 1));
+  next_relative_state = puzzle2.getNextState(initial_state, LEFT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 0);
 
-  next_state = puzzle2.getNextState(initial_state, RIGHT);
-  BOOST_TEST(next_state[0] == xy_to_position(2, 1));
+  next_relative_state = puzzle2.getNextState(initial_state, RIGHT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(2, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 1);
 
   // Add a right agent wall
   object_collisions.static_collisions[RIGHT][AGENT].insert(
       xy_to_position(1, 1));
   PushWorldPuzzle puzzle3(initial_state, goal, object_collisions);
 
-  next_state = puzzle3.getNextState(initial_state, RIGHT);
-  BOOST_TEST(next_state[0] == xy_to_position(1, 1));
+  next_relative_state = puzzle3.getNextState(initial_state, RIGHT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 0);
 
   // Add a top agent wall
   object_collisions.static_collisions[UP][AGENT].insert(xy_to_position(1, 1));
   PushWorldPuzzle puzzle4(initial_state, goal, object_collisions);
 
-  next_state = puzzle4.getNextState(initial_state, UP);
-  BOOST_TEST(next_state[0] == xy_to_position(1, 1));
+  next_relative_state = puzzle4.getNextState(initial_state, UP);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 0);
 
   // Add a bottom agent wall
   object_collisions.static_collisions[DOWN][AGENT].insert(xy_to_position(1, 1));
   PushWorldPuzzle puzzle5(initial_state, goal, object_collisions);
 
-  next_state = puzzle5.getNextState(initial_state, DOWN);
-  BOOST_TEST(next_state[0] == xy_to_position(1, 1));
+  next_relative_state = puzzle5.getNextState(initial_state, DOWN);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 0);
 }
 
 /* Checks that the agent can push an object. */
@@ -156,17 +155,25 @@ BOOST_AUTO_TEST_CASE(test_pushing) {
 
   PushWorldPuzzle puzzle(initial_state, Goal(), object_collisions);
 
-  State next_state = puzzle.getNextState(initial_state, DOWN);
-  BOOST_TEST(next_state[0] == xy_to_position(1, 2));
-  BOOST_TEST(next_state[1] == xy_to_position(2, 1));
+  RelativeState next_relative_state = puzzle.getNextState(initial_state, DOWN);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(1, 2));
+  BOOST_TEST(next_relative_state.state[1] == xy_to_position(2, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 1);
+  BOOST_TEST(next_relative_state.moved_object_indices[0] == 0);
 
-  next_state = puzzle.getNextState(initial_state, RIGHT);
-  BOOST_TEST(next_state[0] == xy_to_position(2, 1));
-  BOOST_TEST(next_state[1] == xy_to_position(3, 1));
+  next_relative_state = puzzle.getNextState(initial_state, RIGHT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(2, 1));
+  BOOST_TEST(next_relative_state.state[1] == xy_to_position(3, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 2);
+  BOOST_TEST(next_relative_state.moved_object_indices[0] == 0);
+  BOOST_TEST(next_relative_state.moved_object_indices[1] == 1);
 
-  next_state = puzzle.getNextState(next_state, RIGHT);
-  BOOST_TEST(next_state[0] == xy_to_position(3, 1));
-  BOOST_TEST(next_state[1] == xy_to_position(4, 1));
+  next_relative_state = puzzle.getNextState(next_relative_state.state, RIGHT);
+  BOOST_TEST(next_relative_state.state[0] == xy_to_position(3, 1));
+  BOOST_TEST(next_relative_state.state[1] == xy_to_position(4, 1));
+  BOOST_TEST(next_relative_state.moved_object_indices.size() == 2);
+  BOOST_TEST(next_relative_state.moved_object_indices[0] == 0);
+  BOOST_TEST(next_relative_state.moved_object_indices[1] == 1);
 }
 
 /* Checks the agent can push an object by using another "tool" object in
@@ -174,7 +181,7 @@ BOOST_AUTO_TEST_CASE(test_pushing) {
 BOOST_AUTO_TEST_CASE(test_transitive_pushing) {
   State initial_state = {xy_to_position(1, 1), xy_to_position(3, 1),
                          xy_to_position(5, 1)};
-  State s1, s2;
+  RelativeState s1, s2;
 
   ObjectCollisions object_collisions(initial_state.size());
   object_collisions.dynamic_collisions[RIGHT][0][1].insert(
@@ -185,29 +192,38 @@ BOOST_AUTO_TEST_CASE(test_transitive_pushing) {
   PushWorldPuzzle puzzle(initial_state, Goal(), object_collisions);
 
   s1 = puzzle.getNextState(initial_state, DOWN);
-  BOOST_TEST(s1[0] == xy_to_position(1, 2));
-  BOOST_TEST(s1[1] == xy_to_position(3, 1));
-  BOOST_TEST(s1[2] == xy_to_position(5, 1));
+  BOOST_TEST(s1.state[0] == xy_to_position(1, 2));
+  BOOST_TEST(s1.state[1] == xy_to_position(3, 1));
+  BOOST_TEST(s1.state[2] == xy_to_position(5, 1));
+  BOOST_TEST(s1.moved_object_indices.size() == 1);
+  BOOST_TEST(s1.moved_object_indices[0] == 0);
 
   s1 = puzzle.getNextState(initial_state, RIGHT);
-  BOOST_TEST(s1[0] == xy_to_position(2, 1));
-  BOOST_TEST(s1[1] == xy_to_position(3, 1));
-  BOOST_TEST(s1[2] == xy_to_position(5, 1));
+  BOOST_TEST(s1.state[0] == xy_to_position(2, 1));
+  BOOST_TEST(s1.state[1] == xy_to_position(3, 1));
+  BOOST_TEST(s1.state[2] == xy_to_position(5, 1));
 
-  s2 = puzzle.getNextState(s1, RIGHT);
-  BOOST_TEST(s2[0] == xy_to_position(3, 1));
-  BOOST_TEST(s2[1] == xy_to_position(4, 1));
-  BOOST_TEST(s2[2] == xy_to_position(5, 1));
+  s2 = puzzle.getNextState(s1.state, RIGHT);
+  BOOST_TEST(s2.state[0] == xy_to_position(3, 1));
+  BOOST_TEST(s2.state[1] == xy_to_position(4, 1));
+  BOOST_TEST(s2.state[2] == xy_to_position(5, 1));
+  BOOST_TEST(s2.moved_object_indices.size() == 2);
+  BOOST_TEST(s2.moved_object_indices[0] == 0);
+  BOOST_TEST(s2.moved_object_indices[1] == 1);
 
-  s1 = puzzle.getNextState(s2, RIGHT);
-  BOOST_TEST(s1[0] == xy_to_position(4, 1));
-  BOOST_TEST(s1[1] == xy_to_position(5, 1));
-  BOOST_TEST(s1[2] == xy_to_position(6, 1));
+  s1 = puzzle.getNextState(s2.state, RIGHT);
+  BOOST_TEST(s1.state[0] == xy_to_position(4, 1));
+  BOOST_TEST(s1.state[1] == xy_to_position(5, 1));
+  BOOST_TEST(s1.state[2] == xy_to_position(6, 1));
+  BOOST_TEST(s1.moved_object_indices.size() == 3);
+  BOOST_TEST(s1.moved_object_indices[0] == 0);
+  BOOST_TEST(s1.moved_object_indices[1] == 1);
+  BOOST_TEST(s1.moved_object_indices[2] == 2);
 
-  s2 = puzzle.getNextState(s1, UP);
-  BOOST_TEST(s2[0] == xy_to_position(4, 0));
-  BOOST_TEST(s2[1] == xy_to_position(5, 1));
-  BOOST_TEST(s2[2] == xy_to_position(6, 1));
+  s2 = puzzle.getNextState(s1.state, UP);
+  BOOST_TEST(s2.state[0] == xy_to_position(4, 0));
+  BOOST_TEST(s2.state[1] == xy_to_position(5, 1));
+  BOOST_TEST(s2.state[2] == xy_to_position(6, 1));
 }
 
 /* Checks `Pushpuzzle.satisfiesGoal` */
@@ -310,58 +326,64 @@ BOOST_AUTO_TEST_CASE(test_trivial_file_parsing) {
   State state(puzzle.getInitialState());
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, LEFT);      // Push into a wall. No change.
+  // Push into a wall. No change.
+  state = puzzle.getNextState(state, LEFT).state;
   BOOST_TEST(state[0] == xy_to_position(1, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(2, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, UP);        // Push into a wall. No change.
+  // Push into a wall. No change.
+  state = puzzle.getNextState(state, UP).state;
   BOOST_TEST(state[0] == xy_to_position(1, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(2, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state =
-      puzzle.getNextState(state, DOWN);  // Push into a agent wall. No change.
+  // Push into a agent wall. No change.
+  state = puzzle.getNextState(state, DOWN).state;
   BOOST_TEST(state[0] == xy_to_position(1, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(2, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, RIGHT);
+  state = puzzle.getNextState(state, RIGHT).state;
   BOOST_TEST(state[0] == xy_to_position(2, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, RIGHT);  // Transitive stopping. No change.
+  // Transitive stopping. No change.
+  state = puzzle.getNextState(state, RIGHT).state;
   BOOST_TEST(state[0] == xy_to_position(2, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, DOWN);
+  state = puzzle.getNextState(state, DOWN).state;
   BOOST_TEST(state[0] == xy_to_position(2, 3));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, DOWN);      // Push into a wall. No change.
+  // Push into a wall. No change.
+  state = puzzle.getNextState(state, DOWN).state;
   BOOST_TEST(state[0] == xy_to_position(2, 3));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, RIGHT);
+  state = puzzle.getNextState(state, RIGHT).state;
   BOOST_TEST(state[0] == xy_to_position(3, 3));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, RIGHT);     // Push into a wall. No change.
+  // Push into a wall. No change.
+  state = puzzle.getNextState(state, RIGHT).state;
   BOOST_TEST(state[0] == xy_to_position(3, 3));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 2));  // M0
   BOOST_TEST(!puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, UP);
+  state = puzzle.getNextState(state, UP).state;
   BOOST_TEST(state[0] == xy_to_position(3, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 1));  // M0
   BOOST_TEST(puzzle.satisfiesGoal(state));
 
-  state = puzzle.getNextState(state, UP);  // Transitive stopping. No change.
+  // Transitive stopping. No change.
+  state = puzzle.getNextState(state, UP).state;
   BOOST_TEST(state[0] == xy_to_position(3, 2));  // S
   BOOST_TEST(state[1] == xy_to_position(3, 1));  // M0
   BOOST_TEST(puzzle.satisfiesGoal(state));

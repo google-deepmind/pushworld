@@ -244,7 +244,7 @@ PushWorldPuzzle::PushWorldPuzzle(const std::string& filename) {
   int width = x + 1;
   int height = y + 2;
 
-  if (width >= POSITION_LIMIT or height >= POSITION_LIMIT) {
+  if (width >= POSITION_LIMIT || height >= POSITION_LIMIT) {
     throw std::domain_error(
         "The maximum width and height of a PushWorld puzzle is " +
         std::to_string(POSITION_LIMIT));
@@ -383,15 +383,19 @@ void PushWorldPuzzle::init() {
   }
 }
 
-State PushWorldPuzzle::getNextState(const State& state,
+RelativeState PushWorldPuzzle::getNextState(const State& state,
                                     const Action action) const {
   const int agent_pos = state[AGENT];
   const auto& static_collisions = m_object_collisions.static_collisions[action];
   const auto& static_agent_collisions = static_collisions[AGENT];
 
+  RelativeState relative_next_state;
+
   if (static_agent_collisions.find(agent_pos) !=
       static_agent_collisions.end()) {
-    return state;  // "agent" cannot move
+    // The agent cannot move.
+    relative_next_state.state = state;
+    return relative_next_state;
   }
 
   // The frontier stores all objects that are moved by this action that have not
@@ -423,7 +427,9 @@ State PushWorldPuzzle::getNextState(const State& state,
           for (int i = 1; i < num_pushed_objects; i++) {
             m_pushed_objects[m_pushed_object_idxs[i]] = false;
           }
-          return state;
+
+          relative_next_state.state = state;
+          return relative_next_state;
         }
 
         m_pushed_objects[obstacle_idx] = true;
@@ -433,19 +439,24 @@ State PushWorldPuzzle::getNextState(const State& state,
     }
   }
 
-  State next_state(m_initial_state.size());
+  relative_next_state.state.resize(m_initial_state.size());
   const auto displacement = ACTION_DISPLACEMENTS[action];
-  next_state[AGENT] = state[AGENT] + displacement;  // minor optimization
+
+  // minor optimization to keep this out of the loop below
+  relative_next_state.state[AGENT] = state[AGENT] + displacement;
+  relative_next_state.moved_object_indices.push_back(AGENT);
+
   for (int i = 1; i < m_num_objects; i++) {
     if (m_pushed_objects[i]) {
-      next_state[i] = state[i] + displacement;
+      relative_next_state.state[i] = state[i] + displacement;
+      relative_next_state.moved_object_indices.push_back(i);
       m_pushed_objects[i] = false;
     } else {
-      next_state[i] = state[i];
+      relative_next_state.state[i] = state[i];
     }
   }
 
-  return next_state;
+  return relative_next_state;
 }
 
 bool PushWorldPuzzle::satisfiesGoal(const State& state) const {
@@ -461,7 +472,7 @@ bool PushWorldPuzzle::isValidPlan(const Plan& plan) const {
   auto state = m_initial_state;
 
   for (const auto action : plan) {
-    state = getNextState(state, action);
+    state = getNextState(state, action).state;
   }
 
   return satisfiesGoal(state);

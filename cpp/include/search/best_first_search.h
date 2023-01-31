@@ -58,28 +58,37 @@ std::optional<Plan> best_first_search(
   visited.clear();
   visited.insert(initial_state);
 
+  std::vector<int> all_object_indices(initial_state.size());
+  for (int i = 0; i < initial_state.size(); i++) {
+    all_object_indices[i] = i;
+  }
+  const RelativeState initial_relative_state{initial_state,
+                                             std::move(all_object_indices)};
+
   frontier.clear();
   frontier.push(std::make_shared<SearchNode>(nullptr, initial_state),
-                heuristic.estimate_cost_to_goal(initial_state));
+                heuristic.estimate_cost_to_goal(initial_relative_state));
 
   while (!frontier.empty()) {
     const auto parent_node = frontier.top();
     frontier.pop();
 
     for (const auto& action : action_iterator.next()) {
-      const auto state = puzzle.getNextState(parent_node->state, action);
+      const RelativeState relative_state =
+          puzzle.getNextState(parent_node->state, action);
 
       // Ignore the state if it was already visited.
-      if (visited.find(state) == visited.end()) {
-        const auto node = std::make_shared<SearchNode>(parent_node, state);
+      if (visited.find(relative_state.state) == visited.end()) {
+        const auto node =
+            std::make_shared<SearchNode>(parent_node, relative_state.state);
 
-        if (puzzle.satisfiesGoal(state)) {
+        if (puzzle.satisfiesGoal(relative_state.state)) {
           // Return the first solution found.
           return backtrackPlan(puzzle, node);
         }
 
-        frontier.push(node, heuristic.estimate_cost_to_goal(state));
-        visited.insert(state);
+        frontier.push(node, heuristic.estimate_cost_to_goal(relative_state));
+        visited.insert(relative_state.state);
       }
     }
   }

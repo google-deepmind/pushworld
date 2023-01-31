@@ -41,7 +41,7 @@ RecursiveGraphDistanceHeuristic::RecursiveGraphDistanceHeuristic(
 };
 
 float RecursiveGraphDistanceHeuristic::estimate_cost_to_goal(
-    const State& state) {
+    const RelativeState& relative_state) {
   float cost = 0.0f;
   const auto& goal = m_puzzle->getGoal();
 
@@ -49,9 +49,11 @@ float RecursiveGraphDistanceHeuristic::estimate_cost_to_goal(
     const auto goal_position = goal[object_id++];
 
     if (m_fewest_tools) {
-      cost += get_fewest_tools_goal_cost(state, object_id, goal_position);
+      cost += get_fewest_tools_goal_cost(relative_state.state, object_id,
+                                         goal_position);
     } else {
-      cost += get_goal_cost(state, object_id, goal_position, state.size() - 2);
+      cost += get_goal_cost(relative_state.state, object_id, goal_position,
+                            relative_state.state.size() - 2);
     }
 
     // Minor optimization to break early when the cost is infinite.
@@ -207,7 +209,7 @@ RecursiveGraphDistanceHeuristic::get_pushing_costs(
 
     // Check that the pusher does not collide with a static obstacle while
     // performing the pushing movement.
-    if (pushing_movements != pusher_graph->end() and
+    if (pushing_movements != pusher_graph->end() &&
         pushing_movements->second.find(pushing_end_position) !=
             pushing_movements->second.end()) {
       /*
@@ -218,7 +220,7 @@ RecursiveGraphDistanceHeuristic::get_pushing_costs(
       for (const auto pusher_next_position : pusher_next_positions) {
         float distance_cost;
 
-        if (pushing_start_position == pusher_position and
+        if (pushing_start_position == pusher_position &&
             pushing_end_position == pusher_next_position) {
           // This is a simultaneous push, so there is no cost.
           distance_cost = 0;
