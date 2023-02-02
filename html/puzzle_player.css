@@ -1,0 +1,412 @@
+/* 
+Copyright 2022 DeepMind Technologies Limited
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+
+/* Overwrite the default to keep the scrollbar always visible */
+
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(0,0,0,.5);
+  -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+.pushworld_puzzles {
+  border:1px solid #aaa;
+  border-radius: 6px;
+  margin: 10px auto;
+  overflow: hidden;
+  width: 100%;
+}
+
+.select-difficulty {
+  background-color: #f6f6f6;
+  padding-top: 125px;
+  height: 100%;
+}
+
+.previews {
+  overflow-y: auto;
+}
+
+.pushworld_puzzles {
+  min-width: 340px;
+  max-width: 650px;
+}
+
+.pushworld_puzzles .panel {
+  height: 100%;
+}
+
+#play_canvas {
+  height: 500px;
+}
+
+/* Non-mobile */
+@media (hover: hover) and (pointer: fine) {
+  .pushworld_puzzles {
+    height: 604px;
+  }
+  .previews {
+    height: 517px;
+  }
+  #touch-keypad-container {
+    display: none;
+  }
+}
+
+/* Mobile devices */
+@media (hover: none), (pointer: coarse) {
+  .pushworld_puzzles {
+    height: 756px;
+  }
+  .previews {
+    height: 669px;
+  }
+  #touch-keypad-container {
+    display: block;
+  }
+}
+
+/* On mobile, try to keep the puzzle player within the height of the screen. */
+@media (hover: none) and (max-height: 770px) and (min-height: 720px),
+    (pointer: coarse) and (max-height: 770px) and (min-height: 720px) {
+  .pushworld_puzzles {
+    height: 706px;
+  }
+  .previews {
+    height: 619px;
+  }
+  #play_canvas {
+    height: 450px;
+  }
+}
+@media (hover: none) and (max-height: 720px) and (min-height: 670px),
+    (pointer: coarse) and (max-height: 720px) and (min-height: 670px) {
+  .pushworld_puzzles {
+    height: 656px;
+  }
+  .previews {
+    height: 569px;
+  }
+  #play_canvas {
+    height: 400px;
+  }
+}
+@media (hover: none) and (max-height: 670px) and (min-height: 620px),
+    (pointer: coarse) and (max-height: 670px) and (min-height: 620px) {
+  .pushworld_puzzles {
+    height: 606px;
+  }
+  .previews {
+    height: 519px;
+  }
+  #play_canvas {
+    height: 350px;
+  }
+}
+@media (hover: none) and (max-height: 620px) and (min-height: 570px),
+    (pointer: coarse) and (max-height: 620px) and (min-height: 570px) {
+  .pushworld_puzzles {
+    height: 556px;
+  }
+  .previews {
+    height: 469px;
+  }
+  #play_canvas {
+    height: 300px;
+  }
+}
+@media (hover: none) and (max-height: 570px),
+    (pointer: coarse) and (max-height: 570px)  {
+  .pushworld_puzzles {
+    height: 506px;
+  }
+  .previews {
+    height: 419px;
+  }
+  #play_canvas {
+    height: 250px;
+  }
+}
+
+.pushworld_preview {
+  float: left;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  margin: 4px 0px 0px 4px;
+  cursor: pointer;
+  overflow: hidden;
+  width: 150px;
+  height: 150px;
+  position: relative;
+}
+
+.pushworld_preview .puzzle-index {
+  position: absolute;
+  height: 26px;
+  background-color: rgba(240, 240, 240, 0.9);
+  color: black;
+  width: 26px;
+  font-size: 16px;
+  top: 2px;
+  left: 2px;
+  vertical-align: middle;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid #777;
+}
+
+.pushworld_preview:hover, .pushworld_preview:focus {
+  border-color: #ddd;
+  background-color: #eee;
+}
+
+.pushworld_preview:active {
+  border-color: #aaa;
+  background-color: #eee;
+}
+
+.pushworld_preview * {
+  cursor: pointer;
+}
+
+.pushworld_preview canvas {
+  margin: 4px;
+}
+
+.pushworld_puzzles .btn {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.btn .icon {
+  font-size: 19px;
+}
+
+.pushworld_puzzles .puzzle_panel {
+  display: none;
+}
+
+.pushworld_puzzles .puzzle {
+  position: relative;
+}
+
+.preview_list {
+  position: relative;
+}
+
+#pw-preview-template {
+  display: none;
+}
+
+#play_canvas {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.pw-puzzle-loading {
+  margin: 62px;
+}
+
+.pw-puzzle-list-loading {
+  margin: 80px auto;
+  display: block;
+}
+
+.pushworld_preview canvas {
+  display: none;
+}
+
+
+/* Modals */
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: absolute; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #999;
+  text-align: center;
+  border-radius: 10px;
+}
+
+.arrow-keys {
+  margin: auto;
+  width: 132px;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+#instructions_modal .text {
+  clear: both;
+  padding: 10px;
+}
+
+#instructions_modal button {
+  font-size: 17px;
+}
+
+.arrow-keys .key {
+  padding: 0px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  margin: 2px;
+  float: left;
+  background-color: #eee;
+  height: 33px;
+  width: 40px;
+  font-size: 20px;
+  text-align: center;
+}
+
+#touch-keypad-container {
+  width: 100%;
+  touch-action: manipulation;
+}
+
+#touch-keypad {
+  width: 282px;
+  height: 152px;
+}
+
+#touch-keypad.arrow-keys .key {
+  height: 70px;
+  width: 90px;
+  font-size: 56px;
+  writing-mode: vertical-rl;  /* improves vertical alignment */
+}
+
+#touch-keypad .up-down-group {
+  float: left;
+  width: 94px;
+}
+
+#touch-keypad .key {
+  touch-action: manipulation;
+}
+
+#touch-keypad .left {
+  margin-top: 37px;
+}
+#touch-keypad .right {
+  margin-top: 37px;
+}
+
+.loading .modal-content {
+  font-size: 30px;
+  width: 200px;
+  margin-top: 190px;
+}
+
+#solved_modal .modal-content {
+  font-size: 30px;
+  width: 200px;
+  margin-top: 190px;
+}
+
+#instructions_modal .modal-content {
+  font-size: 20px;
+  max-width: 350px;
+  margin-top: 95px;
+}
+
+#instructions_modal a {
+  color: red;
+}
+
+
+.pushworld_puzzles .left-buttons {
+  float: left;
+  height: 32px;
+}
+
+.pushworld_puzzles .right-buttons {
+  float: right;
+}
+
+/* Photon overrides */
+
+.pushworld_puzzles .btn {
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.pushworld_puzzles .title {
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  height: 100%;
+  text-align: center;
+  margin: 0px auto;
+}
+
+.pushworld_puzzles .toolbar.title-toolbar {
+    height: 38px;
+}
+
+.vcenter {
+  vertical-align: middle;
+
+  /* Internet Explorer 10 */
+  display: -ms-flexbox;
+  -ms-flex-pack: center;
+  -ms-flex-align: center;
+
+  /* Firefox */
+  display: -moz-box;
+  -moz-box-pack: center;
+  -moz-box-align: center;
+
+  /* Safari, Opera, and Chrome */
+  display: -webkit-box;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+
+  /* Others */
+  display: box;
+  box-pack: center;
+  box-align: center;
+}
+
+.pushworld_puzzles .toolbar {
+  border-bottom: 1px solid #aaa;
+  height: 45px;
+}
+
+

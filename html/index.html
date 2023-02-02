@@ -1,0 +1,219 @@
+<!--
+Copyright 2022 DeepMind Technologies Limited
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>PushWorld</title>
+
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="photon.min.css">
+  <link rel="stylesheet" href="puzzle_player.css">
+</head>
+
+<body>
+
+<div class="pushworld_puzzles">
+  <div class="select_puzzle_group panel">
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title vcenter">Select a Puzzle Difficulty</div>
+    </div>
+    <div class="select-difficulty">
+      <div style="text-align: center;">
+        <div><div style="font-size:20px; padding:10px 20px;" class="btn btn-form btn-large btn-primary" puzzle_group="level1">Level 1</div></div>
+        <div style="margin-top:20px;"><div style="font-size:20px; padding:10px 20px;" class="btn btn-form btn-large btn-primary" puzzle_group="level2">Level 2</div></div>
+        <div style="margin-top:20px;"><div style="font-size:20px; padding:10px 20px;" class="btn btn-form btn-large btn-primary" puzzle_group="level3">Level 3</div></div>
+        <div style="margin-top:20px;"><div style="font-size:20px; padding:10px 20px;" class="btn btn-form btn-large btn-primary" puzzle_group="level4">Level 4</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="pw-preview-template" class="pushworld_preview">
+    <img src="images/loading.gif" class="pw-puzzle-loading" alt="Loading" width="25px" height="25px"/>
+    <div class="puzzle-index"></div>
+    <canvas class="vcenter" height="138px" width="138px"></canvas>
+  </div>
+
+  <div class="preview_panel panel" puzzle_group="level1" style="display:none;">
+
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title puzzle_title vcenter">Level 1 Puzzles</div>
+    </div>
+    <div class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+        <div class="left-buttons">
+          <button class="return_select_puzzle_group btn btn-large btn-default">
+            <span class="icon icon-left icon-text"></span>
+            Select Difficulty
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview_list">
+      <img src="images/loading.gif" class="pw-puzzle-list-loading" alt="Loading" width="25px" height="25px"/>
+      <div class="previews"></div>
+    </div>
+  </div>
+
+  <div class="preview_panel panel" puzzle_group="level2" style="display:none;">
+
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title puzzle_title vcenter">Level 2 Puzzles</div>
+    </div>
+    <div class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+        <div class="left-buttons">
+          <button class="return_select_puzzle_group btn btn-large btn-default">
+            <span class="icon icon-left icon-text"></span>
+            Select Difficulty
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview_list">
+      <img src="images/loading.gif" class="pw-puzzle-list-loading" alt="Loading" width="25px" height="25px"/>
+      <div class="previews"></div>
+    </div>
+  </div>
+
+  <div class="preview_panel panel" puzzle_group="level3" style="display:none;">
+
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title puzzle_title vcenter">Level 3 Puzzles</div>
+    </div>
+    <div class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+        <div class="left-buttons">
+          <button class="return_select_puzzle_group btn btn-large btn-default">
+            <span class="icon icon-left icon-text"></span>
+            Select Difficulty
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview_list">
+      <img src="images/loading.gif" class="pw-puzzle-list-loading" alt="Loading" width="25px" height="25px"/>
+      <div class="previews"></div>
+    </div>
+  </div>
+
+  <div class="preview_panel panel" puzzle_group="level4" style="display:none;">
+
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title puzzle_title vcenter">Level 4 Puzzles</div>
+    </div>
+    <div class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+        <div class="left-buttons">
+          <button class="return_select_puzzle_group btn btn-large btn-default">
+            <span class="icon icon-left icon-text"></span>
+            Select Difficulty
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview_list">
+      <img src="images/loading.gif" class="pw-puzzle-list-loading" alt="Loading" width="25px" height="25px"/>
+      <div class="previews"></div>
+    </div>
+  </div>
+
+  <div class="puzzle_panel panel">
+    <div class="toolbar toolbar-header title-toolbar">
+      <div class="title puzzle_title vcenter">Puzzle Name</div>
+    </div>
+    <div class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+        <div class="left-buttons">
+          <button class="all_puzzles btn btn-large btn-default">
+            <span class="icon icon-layout icon-text"></span>
+            Puzzle List
+          </button>
+        </div>
+        <div class="right-buttons">
+          <button class="reset_button btn btn-large btn-default pull-right">
+            <span class="icon icon-to-start icon-text"></span>
+            Reset
+          </button>
+
+          <button class="undo_button btn btn-large btn-default pull-right">
+            <span class="icon icon-left icon-text"></span>
+            Undo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="puzzle">
+      <div id="instructions_modal" class="modal" style="display:block;">
+        <div class="modal-content">
+          <div class="arrow-keys">
+            <div class="key hidden"></div>
+            <div class="key"><span class="icon icon-up-bold"></span></div>
+            <div class="key hidden"></div>
+            <div class="key"><span class="icon icon-left-bold"></span></div>
+            <div class="key"><span class="icon icon-down-bold"></span></div>
+            <div class="key"><span class="icon icon-right-bold"></span></div>
+          </div>
+          <div class="text">Use the arrow keys to push the <a>red shapes</a> into their outlines. Use the
+            <span class="icon icon-left icon-text" style="margin: 0px 5px;"></span><b>Undo</b>
+          and
+          <span class="icon icon-to-start icon-text" style="margin: 0px 5px;"></span><b>Reset</b>
+          buttons above to retry a puzzle.
+          </div>
+          <button type="submit" class="btn btn-form btn-large btn-primary">OK, got it!</button>
+        </div>
+      </div>
+
+      <div id="solved_modal" class="modal">
+        <div class="modal-content">
+          Solved!
+        </div>
+      </div>
+
+      <canvas id="play_canvas"></canvas>
+
+      <div id="touch-keypad-container">
+        <div id="touch-keypad" class="arrow-keys">
+          <div class="key left"><span class="icon icon-left-bold"></span></div>
+          <div class="up-down-group">
+            <div class="key up"><span class="icon icon-up-bold"></span></div>
+            <div class="key down"><span class="icon icon-down-bold"></span></div>
+          </div>
+          <div class="key right"><span class="icon icon-right-bold"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Javascript - place at the end to avoid blocking page loading -->
+<script src="jquery-3.6.0.min.js" charset="utf-8"></script>
+<script src="index.js" charset="utf-8"></script>
+
+</body>
+</html>
