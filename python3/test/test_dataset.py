@@ -32,7 +32,7 @@ def test_dataset() -> None:
         BENCHMARK_SOLUTIONS_PATH, ".yaml"
     ):
         with open(result_file_path) as file:
-            planning_result = yaml.load(file, Loader=yaml.FullLoader)
+            planning_result = yaml.safe_load(file)
 
         puzzle_name = planning_result["puzzle"]
         if puzzle_name not in puzzle_file_paths:

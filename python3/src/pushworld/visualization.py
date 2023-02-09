@@ -87,7 +87,7 @@ def render_plans(
         output_extension=".mp4",
     ):
         with open(planning_result_file_path) as result_file:
-            planning_result = yaml.load(result_file, Loader=yaml.FullLoader)
+            planning_result = yaml.safe_load(result_file)
 
         plan = planning_result["plan"]
         if plan is None:
