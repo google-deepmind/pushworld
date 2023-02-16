@@ -1,5 +1,7 @@
 # PushWorld: A benchmark for manipulation planning with tools and movable obstacles
 
+<a href="[https://huggingface.co/spaces/multimodalart/mariogpt](https://huggingface.co/spaces/jbrinkma/deepmind-pushworld)"><img src="https://img.shields.io/badge/%20HuggingFace%20-Demo-blue.svg" alt="Hugging Face Spaces"></a>
+
 This repository contains the PushWorld environment, a collection of benchmark
 puzzles to compare the performance of different solvers, and a state-of-the-art
 planner for this environment.
