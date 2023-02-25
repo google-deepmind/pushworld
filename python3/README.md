@@ -54,3 +54,9 @@ To convert all puzzles to PDDL:
 ```
 ./scripts/convert_to_pddl.py --pddl_path=pddl_puzzles
 ```
+
+To generate level 0 puzzles (use --help flag for puzzle options):
+
+```
+./scripts/generate_level0_puzzles.py --save_location_path=training_puzzles --num_puzzles=100
+```

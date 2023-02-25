@@ -15,6 +15,7 @@
 import os
 from typing import Optional
 
+import tqdm
 import yaml
 
 from pushworld.config import BENCHMARK_PUZZLES_PATH, PUZZLE_EXTENSION, RGD_PLANNER_PATH
@@ -66,11 +67,13 @@ def benchmark_rgd_planner(
 
     planner_name = heuristic_to_planner_name[heuristic]
 
-    for puzzle_file_path, planning_result_file_path in map_files_with_extension(
-        input_file_or_directory_path=puzzles_path,
-        input_extension=PUZZLE_EXTENSION,
-        output_directory_path=results_path,
-        output_extension=".yaml",
+    for puzzle_file_path, planning_result_file_path in tqdm.tqdm(
+        map_files_with_extension(
+            input_file_or_directory_path=puzzles_path,
+            input_extension=PUZZLE_EXTENSION,
+            output_directory_path=results_path,
+            output_extension=".yaml",
+        )
     ):
         out, _, planning_time = run_process(
             command=[RGD_PLANNER_PATH, heuristic, puzzle_file_path],
