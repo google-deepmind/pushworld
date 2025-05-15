@@ -143,7 +143,7 @@ class PushWorldEnv(gym.Env):
         return "rgb_array"
 
     @property
-    def current_puzzle(self) -> PushWorldPuzzle or None:
+    def current_puzzle(self) -> Union[PushWorldPuzzle, None]:
         """The current puzzle, or `None` if `reset` has not yet been called."""
         return self._current_puzzle
 

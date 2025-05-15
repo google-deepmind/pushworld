@@ -137,12 +137,12 @@ class PushWorldEnv(dm_env.Environment):
         return self._action_space
 
     @property
-    def current_puzzle(self) -> PushWorldPuzzle or None:
+    def current_puzzle(self) -> Union[PushWorldPuzzle, None]:
         """The current puzzle, or `None` if `reset` has not yet been called."""
         return self._current_puzzle
 
     @property
-    def current_state(self) -> State or None:
+    def current_state(self) -> Union[State, None]:
         """The current state, or `None` if the environment has just been initialized.
         """
         return self._current_state
